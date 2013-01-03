@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/webflow-config http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.3.xsd">
+
+  <bean name="flowExecutor" class="org.springframework.webflow.executor.FlowExecutorImpl">
+    <constructor-arg ref="flowRegistry" />
+    <constructor-arg ref="flowExecutionFactory" />
+    <constructor-arg ref="flowExecutionRepository" />
+  </bean>
+
+  <webflow:flow-registry id="flowRegistry" flow-builder-services="flowBuilder">
+    <webflow:flow-location path="test-flow.xml" id="test"/>
+  </webflow:flow-registry>
+
+  <webflow:flow-builder-services id="flowBuilder" view-factory-creator="viewFactoryCreator" />
+
+  <bean name="flowExecutionFactory" class="org.springframework.webflow.engine.impl.FlowExecutionImplFactory"
+        p:executionKeyFactory-ref="flowExecutionRepository" />
+
+  <bean id="flowExecutionRepository" class="edu.vt.middleware.webflow.ClientFlowExecutionRepository">
+    <constructor-arg ref="flowExecutionFactory" />
+    <constructor-arg ref="flowRegistry" />
+    <constructor-arg ref="transcoder" />
+  </bean>
+
+  <bean id="viewFactoryCreator" class="org.springframework.webflow.test.MockViewFactoryCreator" />
+
+  <bean id="transcoder" class="edu.vt.middleware.webflow.EncryptedTranscoder" init-method="init"
+        p:cipherSpec="AES/CBC/PKCS5Padding"
+        p:IV="RPFgDkx2UURhg76uwdpFzg=="
+        p:key="DyiZXcYwDyshV3VLtEaNKQ=="
+        p:compression="true" />
+
+</beans>
