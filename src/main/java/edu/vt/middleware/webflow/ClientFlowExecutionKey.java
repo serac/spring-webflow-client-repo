@@ -25,8 +25,8 @@ import org.springframework.webflow.execution.FlowExecutionKey;
 import org.springframework.webflow.execution.repository.BadlyFormattedFlowExecutionKeyException;
 
 /**
- * Spring Webflow execution key that contains the serialized flow execution state as part of the identifier.
- * Keys produced by this class have the form KEY_BASE64 where KEY is a globally unique identifier and BASE64
+ * Spring Webflow execution id that contains the serialized flow execution state as part of the identifier.
+ * Keys produced by this class have the form ID_BASE64 where ID is a globally unique identifier and BASE64
  * is the base-64 encoded bytes of a serialized object output stream.
  *
  * @author Middleware Services
@@ -36,13 +36,13 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
 
     public static final String KEY_FORMAT = "<uuid>_<base64-encoded-flow-state>";
 
-    private static final long serialVersionUID = 1499481653992008590L;
+    private static final long serialVersionUID = 3514659327458916297L;
 
     private static final int HASH_SEED = 31;
 
     private static final int HASH_FACTOR = 99;
 
-    private UUID key;
+    private UUID id;
 
     private byte[] data;
 
@@ -51,14 +51,14 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
         this(UUID.randomUUID(), data);
     }
 
-    public ClientFlowExecutionKey(final UUID key, final byte[] data) {
-        Assert.notNull(key, "Flow execution key cannot be null.");
-        this.key = key;
+    public ClientFlowExecutionKey(final UUID id, final byte[] data) {
+        Assert.notNull(id, "Flow execution id cannot be null.");
+        this.id = id;
         this.data = data;
     }
 
-    public UUID getKey() {
-        return this.key;
+    public UUID getId() {
+        return this.id;
     }
 
     public byte[] getData() {
@@ -74,13 +74,13 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
             return false;
         }
         final ClientFlowExecutionKey other = (ClientFlowExecutionKey) o;
-        return this.key.equals(other.key) && Arrays.equals(this.data, other.data);
+        return this.id.equals(other.id) && Arrays.equals(this.data, other.data);
     }
 
     @Override
     public int hashCode() {
         int hash = HASH_SEED;
-        hash += HASH_FACTOR * this.key.hashCode();
+        hash += HASH_FACTOR * this.id.hashCode();
         for (int i = 0; i < this.data.length; i++) {
             hash += HASH_FACTOR * this.data[i];
         }
@@ -89,7 +89,7 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
 
     @Override
     public String toString() {
-        return this.key + "_" + Base64.encodeBase64String(this.data);
+        return this.id + "_" + Base64.encodeBase64String(this.data);
     }
 
     public static ClientFlowExecutionKey parse(final String key) throws BadlyFormattedFlowExecutionKeyException {
@@ -118,7 +118,7 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
 
     private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
         final ClientFlowExecutionKey temp = parse(in.readUTF());
-        this.key = temp.key;
+        this.id = temp.id;
         this.data = temp.data;
     }
 }
