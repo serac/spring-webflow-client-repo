@@ -1,0 +1,9 @@
+Spring Webflow Client Repository
+Copyright 2013 Virginia Tech
+
+This product makes use of components developed by third parties. The licensing terms are noted for each product.
+
+ 1. Spring Framework - Apache License v2.0
+ 2. Commons Codec - Apache License v2.0
+ 3. JUnit - Common Public License Version 1.0
+

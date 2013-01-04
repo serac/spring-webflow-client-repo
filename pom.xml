@@ -7,11 +7,27 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>spring-webflow-client-repo</name>
+  <name>Spring Webflow Client Repository</name>
+  <description>Flow execution storage on client via form/request parameter.</description>
+  <url>https://github.com/serac/spring-webflow-client-repo</url>
+  <inceptionYear>2013</inceptionYear>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>serac</id>
+      <name>Marvin S. Addison</name>
+      <email>marvin.addison@gmail.com</email>
+      <timezone>-5</timezone>
+    </developer>
+  </developers>
 
   <dependencies>
     <dependency>
@@ -43,4 +59,56 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <version>1.10.b1</version>
+        <configuration>
+          <header>src/etc/header.txt</header>
+          <headerDefinitions>
+            <headerDefinition>src/etc/header-definitions.xml</headerDefinition>
+          </headerDefinitions>
+          <strictCheck>true</strictCheck>
+          <excludes>
+            <exclude>LICENSE</exclude>
+            <exclude>**/INSTALL*</exclude>
+            <exclude>**/NOTICE*</exclude>
+            <exclude>**/README*</exclude>
+            <exclude>**/*.iml</exclude>
+            <exclude>**/*.log</exclude>
+            <exclude>**/*.license</exclude>
+            <exclude>**/.gitignore</exclude>
+            <exclude>**/.project</exclude>
+            <exclude>src/etc/**</exclude>
+            <exclude>**/.eclipse/**</exclude>
+            <exclude>**/.idea/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 </project>
