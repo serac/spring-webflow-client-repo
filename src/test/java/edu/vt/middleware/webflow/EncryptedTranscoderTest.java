@@ -15,11 +15,18 @@
  */
 package edu.vt.middleware.webflow;
 
+import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.cryptacular.bean.AEADBlockCipherBean;
+import org.cryptacular.bean.BufferedBlockCipherBean;
+import org.cryptacular.bean.KeyStoreFactoryBean;
+import org.cryptacular.io.FileResource;
+import org.cryptacular.spec.AEADBlockCipherSpec;
+import org.cryptacular.spec.BufferedBlockCipherSpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -47,46 +54,44 @@ public class EncryptedTranscoderTest {
 
     @Parameters
     public static Collection<Object[]> data() throws Exception {
-        final String iv64 = "0khXskIDcZ8=";
-        final String iv128 = "Tt6uHLdUp2VlRu8zunYQUA==";
-        final String key128 = "77LSKX7cjabjvDgjXyGWwA==";
-        final String key256 = "4Io3Tji/578bgca6b140XQkA1A3ZKOQSjPYVOdDdY0Y=";
+        final KeyStoreFactoryBean ksFactory = new KeyStoreFactoryBean();
+        ksFactory.setResource(new FileResource(new File("src/test/resources/test-keystore.jceks")));
+        ksFactory.setType("JCEKS");
+        ksFactory.setPassword("changeit");
 
         // Test case #1
-        // 128-bit AES with compression
+        // 128-bit AES in GCM mode with compression
         final EncryptedTranscoder transcoder1 = new EncryptedTranscoder();
-        transcoder1.setIV(iv128);
-        transcoder1.setCipherSpec("AES/CBC/PKCS5Padding");
-        transcoder1.setKey(key128);
+        final AEADBlockCipherBean cipherBean1 = new AEADBlockCipherBean();
+        cipherBean1.setBlockCipherSpec(new AEADBlockCipherSpec("AES", "GCM"));
+        cipherBean1.setKeyStore(ksFactory.newInstance());
+        cipherBean1.setKeyAlias("aes128");
+        cipherBean1.setKeyPassword("changeit");
+        cipherBean1.setNonce(new org.cryptacular.generator.sp80038d.RBGNonce());
+        transcoder1.setCipherBean(cipherBean1);
         transcoder1.setCompression(true);
 
         // Test case #2
-        // 256-bit AES with compression
-        // NOTE: This test requires use of JVM with unlimited strength JCE policy files due to 256-bit key size
+        // 128-bit AES in CBC mode without compression
         final EncryptedTranscoder transcoder2 = new EncryptedTranscoder();
-        transcoder2.setIV(iv128);
-        transcoder2.setCipherSpec("AES/CBC/PKCS5Padding");
-        transcoder2.setKey(key256);
-        transcoder2.setCompression(true);
-
-        // Test case #3
-        // 128-bit Blowfish in OFB mode without compression
-        final EncryptedTranscoder transcoder3 = new EncryptedTranscoder();
-        transcoder3.setIV(iv64);
-        transcoder3.setCipherSpec("Blowfish/OFB/PKCS5Padding");
-        transcoder3.setKey(key128);
-        transcoder3.setCompression(false);
+        final BufferedBlockCipherBean cipherBean2 = new BufferedBlockCipherBean();
+        cipherBean2.setBlockCipherSpec(new BufferedBlockCipherSpec("AES", "CBC", "PKCS7"));
+        cipherBean2.setKeyStore(ksFactory.newInstance());
+        cipherBean2.setKeyAlias("aes128");
+        cipherBean2.setKeyPassword("changeit");
+        cipherBean2.setNonce(new org.cryptacular.generator.sp80038a.RBGNonce());
+        transcoder2.setCipherBean(cipherBean2);
+        transcoder2.setCompression(false);
 
         return Arrays.asList(new Object[][] {
-                { transcoder1, "Able was I ere I saw elba." },
                 {
-                        transcoder2,
+                        transcoder1,
                         "Four score and seven years ago our forefathers brought forth upon this continent a " +
                                 "new nation conceived in liberty and dedicated to the proposition that all men " +
                                 "are created equal.",
                 },
                 {
-                        transcoder3,
+                        transcoder2,
                         new URL("https://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&" +
                                 "q=1600+Pennsylvania+Avenue+Northwest+Washington,+DC+20500&aq=&" +
                                 "sll=38.897678,-77.036517&sspn=0.00835,0.007939&vpsrc=6&t=w&" +
@@ -98,7 +103,6 @@ public class EncryptedTranscoderTest {
 
     @Test
     public void testEncodeDecode() throws Exception {
-        this.transcoder.init();
         final byte[] encoded = this.transcoder.encode(this.encodable);
         assertEquals(this.encodable, this.transcoder.decode(encoded));
     }

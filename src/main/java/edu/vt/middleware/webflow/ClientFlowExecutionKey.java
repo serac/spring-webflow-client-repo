@@ -37,7 +37,7 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.apache.commons.codec.binary.Base64;
+import org.cryptacular.util.CodecUtil;
 import org.springframework.util.Assert;
 import org.springframework.webflow.execution.FlowExecutionKey;
 import org.springframework.webflow.execution.repository.BadlyFormattedFlowExecutionKeyException;
@@ -106,7 +106,7 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
 
     @Override
     public String toString() {
-        return this.id + "_" + Base64.encodeBase64String(this.data);
+        return this.id + "_" + CodecUtil.b64(this.data);
     }
 
     public static ClientFlowExecutionKey parse(final String key) throws BadlyFormattedFlowExecutionKeyException {
@@ -122,7 +122,7 @@ public class ClientFlowExecutionKey extends FlowExecutionKey {
         }
         final byte[] decoded;
         try {
-            decoded = Base64.decodeBase64(tokens[1]);
+            decoded = CodecUtil.b64(tokens[1]);
         } catch (Exception e) {
             throw new BadlyFormattedFlowExecutionKeyException(key, KEY_FORMAT);
         }

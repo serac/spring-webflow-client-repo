@@ -19,6 +19,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+       xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
@@ -47,10 +48,34 @@
 
   <bean id="viewFactoryCreator" class="org.springframework.webflow.test.MockViewFactoryCreator" />
 
-  <bean id="transcoder" class="edu.vt.middleware.webflow.EncryptedTranscoder" init-method="init"
-        p:cipherSpec="AES/CBC/PKCS5Padding"
-        p:IV="RPFgDkx2UURhg76uwdpFzg=="
-        p:key="DyiZXcYwDyshV3VLtEaNKQ=="
-        p:compression="true" />
+  <bean id="transcoder" class="edu.vt.middleware.webflow.EncryptedTranscoder"
+        p:compression="true">
+    <property name="cipherBean">
+      <bean class="org.cryptacular.bean.AEADBlockCipherBean"
+            p:keyAlias="aes128"
+            p:keyPassword="changeit">
+        <property name="keyStore">
+          <bean factory-bean="keystoreFactory" factory-method="newInstance" />
+        </property>
+        <property name="blockCipherSpec">
+          <bean class="org.cryptacular.spec.AEADBlockCipherSpec"
+                c:algName="AES"
+                c:cipherMode="GCM"/>
+        </property>
+        <property name="nonce">
+          <bean class="org.cryptacular.generator.sp80038d.RBGNonce" />
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+  <bean id="keystoreFactory" class="org.cryptacular.bean.KeyStoreFactoryBean"
+        p:type="JCEKS"
+        p:password="changeit">
+    <property name="resource">
+      <bean class="org.cryptacular.io.FileResource"
+            c:file="src/test/resources/test-keystore.jceks" />
+    </property>
+  </bean>
 
 </beans>
